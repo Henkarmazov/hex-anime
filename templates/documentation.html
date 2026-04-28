@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HexAnime API — Documentation</title>
+  <link rel="icon" type="image/png" href="public/assets/images/hxicon.png">
+   <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --black: #0a0a0a;
+      --white: #f5f5f0;
+      --gray-100: #1a1a1a;
+      --gray-200: #2a2a2a;
+      --gray-300: #3d3d3d;
+      --gray-400: #888;
+      --gray-500: #bbb;
+      --accent: #e8e8e0;
+      --mono: 'JetBrains Mono', monospace;
+      --sans: 'Syne', sans-serif;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--black);
+      color: var(--white);
+      font-family: var(--sans);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── NOISE GRAIN OVERLAY ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.4;
+    }
+
+    /* ── SIDEBAR NAV ── */
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 240px;
+      height: 100vh;
+      background: var(--gray-100);
+      border-right: 1px solid var(--gray-200);
+      padding: 2rem 0;
+      overflow-y: auto;
+      z-index: 100;
+    }
+
+    .sidebar-logo {
+      padding: 0 1.5rem 2rem;
+      border-bottom: 1px solid var(--gray-200);
+      margin-bottom: 1.5rem;
+    }
+
+    .sidebar-logo .logo-text {
+      font-size: 1.1rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--white);
+    }
+
+    .sidebar-logo .logo-sub {
+      font-size: 0.7rem;
+      color: var(--gray-400);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-top: 3px;
+      font-family: var(--mono);
+    }
+
+    .nav-section {
+      padding: 0 1rem 1.5rem;
+    }
+
+    .nav-section-label {
+      font-size: 0.6rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--gray-400);
+      font-family: var(--mono);
+      padding: 0 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.45rem 0.5rem;
+      border-radius: 6px;
+      text-decoration: none;
+      color: var(--gray-500);
+      font-size: 0.82rem;
+      font-weight: 600;
+      transition: all 0.15s ease;
+      margin-bottom: 1px;
+    }
+
+    .nav-link:hover {
+      background: var(--gray-200);
+      color: var(--white);
+    }
+
+    .nav-link .nav-icon {
+      font-size: 0.85rem;
+      width: 18px;
+      text-align: center;
+    }
+
+    /* ── MAIN CONTENT ── */
+    .main {
+      margin-left: 240px;
+      min-height: 100vh;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      padding: 5rem 4rem 4rem;
+      border-bottom: 1px solid var(--gray-200);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::after {
+      content: 'API';
+      position: absolute;
+      right: 3rem;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 12rem;
+      font-weight: 800;
+      color: var(--gray-100);
+      letter-spacing: -0.05em;
+      pointer-events: none;
+      user-select: none;
+      line-height: 1;
+    }
+
+    .hero-eyebrow {
+      font-size: 0.7rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--gray-400);
+      font-family: var(--mono);
+      margin-bottom: 1rem;
+    }
+
+    .hero h1 {
+      font-size: clamp(2.5rem, 5vw, 4rem);
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      line-height: 1;
+      color: var(--white);
+      margin-bottom: 1.5rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero h1 span {
+      color: var(--gray-400);
+    }
+
+    .hero-desc {
+      font-size: 1rem;
+      color: var(--gray-500);
+      max-width: 480px;
+      line-height: 1.7;
+      font-family: var(--mono);
+      font-size: 0.82rem;
+    }
+
+    .hero-badges {
+      display: flex;
+      gap: 0.75rem;
+      margin-top: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.35rem 0.75rem;
+      border: 1px solid var(--gray-300);
+      border-radius: 4px;
+      font-size: 0.7rem;
+      font-family: var(--mono);
+      color: var(--gray-400);
+      letter-spacing: 0.05em;
+    }
+
+    .badge-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #4ade80;
+      box-shadow: 0 0 6px #4ade80;
+    }
+
+    /* ── CONTENT AREA ── */
+    .content {
+      padding: 3rem 4rem;
+      max-width: 900px;
+    }
+
+    /* ── ENDPOINT BLOCK ── */
+    .endpoint {
+      margin-bottom: 4rem;
+      animation: fadeUp 0.4s ease both;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .endpoint-header {
+      display: flex;
+      align-items: baseline;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--gray-200);
+    }
+
+    .endpoint-title {
+      font-size: 1.3rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--white);
+    }
+
+    .endpoint-icon {
+      font-size: 1.1rem;
+    }
+
+    .method-badge {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      background: var(--white);
+      color: var(--black);
+      border-radius: 3px;
+      font-size: 0.65rem;
+      font-weight: 700;
+      font-family: var(--mono);
+      letter-spacing: 0.1em;
+      vertical-align: middle;
+    }
+
+    .endpoint-url {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      background: var(--gray-100);
+      border: 1px solid var(--gray-200);
+      border-radius: 8px;
+      padding: 0.9rem 1.2rem;
+      margin-bottom: 1.2rem;
+      overflow-x: auto;
+    }
+
+    .endpoint-url code {
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      color: var(--accent);
+      white-space: nowrap;
+    }
+
+    .endpoint-url code em {
+      color: var(--gray-400);
+      font-style: normal;
+    }
+
+    .desc-text {
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      color: var(--gray-500);
+      line-height: 1.8;
+      margin-bottom: 1.5rem;
+    }
+
+    /* ── PARAMS TABLE ── */
+    .section-label {
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--gray-400);
+      font-family: var(--mono);
+      margin-bottom: 0.75rem;
+    }
+
+    .params-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1.5rem;
+      font-family: var(--mono);
+      font-size: 0.78rem;
+    }
+
+    .params-table th {
+      text-align: left;
+      padding: 0.6rem 0.8rem;
+      color: var(--gray-400);
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      border-bottom: 1px solid var(--gray-200);
+    }
+
+    .params-table td {
+      padding: 0.65rem 0.8rem;
+      border-bottom: 1px solid var(--gray-200);
+      color: var(--gray-500);
+      vertical-align: top;
+    }
+
+    .params-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .params-table tr:hover td {
+      background: var(--gray-100);
+    }
+
+    .param-name {
+      color: var(--accent);
+      font-weight: 500;
+    }
+
+    .param-type {
+      color: var(--gray-400);
+      font-size: 0.72rem;
+    }
+
+    /* ── CODE BLOCK ── */
+    .code-block {
+      background: var(--gray-100);
+      border: 1px solid var(--gray-200);
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 1.5rem;
+    }
+
+    .code-block-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.6rem 1rem;
+      border-bottom: 1px solid var(--gray-200);
+      background: var(--gray-200);
+    }
+
+    .code-block-lang {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      color: var(--gray-400);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .code-block-copy {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      color: var(--gray-400);
+      background: none;
+      border: 1px solid var(--gray-300);
+      padding: 0.2rem 0.5rem;
+      border-radius: 3px;
+      cursor: pointer;
+      transition: all 0.15s;
+      letter-spacing: 0.05em;
+    }
+
+    .code-block-copy:hover {
+      color: var(--white);
+      border-color: var(--gray-400);
+    }
+
+    .code-block pre {
+      padding: 1.2rem 1.2rem;
+      overflow-x: auto;
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      line-height: 1.7;
+      color: var(--gray-500);
+    }
+    
+   .exec-btn {
+  display: inline-block;
+  margin-top: 1rem;
+  padding: 6px 10px;
+  background: #fff;
+  color: #000;
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  text-decoration: none;
+  border-radius: 5px;
+  border: 1px solid #333;
+  transition: 0.2s;
+}
+
+.exec-btn:hover {
+  background: #111;
+  color: #fff;
+}
+
+    .code-block pre .key { color: #a8d8a8; }
+    .code-block pre .str { color: var(--gray-500); }
+    .code-block pre .num { color: #c0a0e0; }
+    .code-block pre .bool { color: #f0c080; }
+
+    /* ── DIVIDER ── */
+    .divider {
+      height: 1px;
+      background: var(--gray-200);
+      margin: 3rem 0;
+    }
+
+    /* ── FOOTER ── */
+    .footer {
+  margin-left: 240px;
+  padding: 2rem 4rem;
+  border-top: 1px solid var(--gray-200);
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--gray-400);
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;   /* ini kuncinya */
+  justify-content: center;
+  gap: 0.4rem;
+  text-align: center;
+}
+
+    /* ── SCROLLBAR ── */
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: var(--black); }
+    ::-webkit-scrollbar-thumb { background: var(--gray-300); border-radius: 3px; }
+
+    @media (max-width: 768px) {
+      .sidebar { transform: translateX(-100%); }
+      .main, .footer { margin-left: 0; }
+      .hero, .content { padding: 2rem 1.5rem; }
+      .hero::after { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── SIDEBAR ── -->
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-text">HexAnime API</div>
+    <div class="logo-sub">v1.0 · REST</div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Endpoints</div>
+    <a class="nav-link" href="#home"><span class="nav-icon">◈</span> Home</a>
+    <a class="nav-link" href="#filter"><span class="nav-icon">◈</span> Filter</a>
+    <a class="nav-link" href="#detail"><span class="nav-icon">◈</span> Detail Anime</a>
+    <a class="nav-link" href="#watch"><span class="nav-icon">◈</span> Nonton</a>
+    <a class="nav-link" href="#search"><span class="nav-icon">◈</span> Search</a>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Kategori</div>
+    <a class="nav-link" href="#genre"><span class="nav-icon">◈</span> Genre</a>
+    <a class="nav-link" href="#director"><span class="nav-icon">◈</span> Director</a>
+    <a class="nav-link" href="#producer"><span class="nav-icon">◈</span> Producer</a>
+    <a class="nav-link" href="#studio"><span class="nav-icon">◈</span> Studio</a>
+    <a class="nav-link" href="#season"><span class="nav-icon">◈</span> Season</a>
+    <a class="nav-link" href="#cast"><span class="nav-icon">◈</span> Cast</a>
+  </div>
+</nav>
+
+<!-- ── MAIN ── -->
+<div class="main">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-eyebrow">REST API Documentation</div>
+    <h1>Anime API<br/><span>Reference</span></h1>
+    <p class="hero-desc">Scraper-based REST API untuk data anime streaming. Semua endpoint mengembalikan JSON.</p>
+    <div class="hero-badges">
+      <div class="badge"><span class="badge-dot"></span> Live</div>
+      <div class="badge">GET only</div>
+      <div class="badge">JSON</div>
+      <div class="badge">No Auth</div>
+    </div>
+  </section>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- HOME -->
+    <div class="endpoint" id="home">
+      <div class="endpoint-header">
+        <span class="endpoint-icon">◈</span>
+        <h2 class="endpoint-title">Home / Latest Release</h2>
+        <span class="method-badge">GET</span>
+      </div>
+      <div class="endpoint-url">
+        <code>https://hex-anime.vercel.app/</code>
+      </div>
+      <p class="desc-text">Daftar anime terbaru yang dirilis dan rekomendasi anime dari halaman utama.</p>
+      <div class="section-label">Response Example</div>
+      <div class="code-block">
+        <div class="code-block-header">
+          <span class="code-block-lang">JSON</span>
+          <button class="code-block-copy" onclick="copyCode(this)">copy</button>
+        </div>
+        <pre>{
+  <span class="key">"count"</span>: <span class="num">40</span>,
+  <span class="key">"latest_release"</span>: [
+    {
+      <span class="key">"episode"</span>: <span class="str">"Ep 1"</span>,
+      <span class="key">"image"</span>:   <span class="str">"https://..."</span>,
+      <span class="key">"slug"</span>:    <span class="str">"kaoru-hana-wa-rin-to-saku-episode-1-subtitle-indonesia"</span>,
+      <span class="key">"status"</span>:  <span class="str">"Sub"</span>,
+      <span class="key">"title_full"</span>: <span class="str">"Kaoru Hana wa Rin to Saku Episode 1"</span>,
+      <span class="key">"type"</span>:    <span class="str">"TV"</span>,
+      <span class="key">"url"</span>:     <span class="str">"https://samehadaku.li/..."</span>
+    }
+  ],
+  <span class="key">"recommendation"</span>: [ <span class="str">/* ... */</span> ],
+  <span class="key">"source"</span>: <span class="str">"https://samehadaku.li/"</span>
+}</pre>
+      </div>
+      <a class="exec-btn" href="https://hex-anime.vercel.app/" target="_blank">Try It Out</a>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- FILTER -->
+    <div class="endpoint" id="filter">
+      <div class="endpoint-header">
+        <span class="endpoint-icon">◈</span>
+        <h2 class="endpoint-title">Anime Filter</h2>
+        <span class="method-badge">GET</span>
+      </div>
+      <div class="endpoint-url">
+        <code>https://hex-anime.vercel.app/anime?<em>genre[]={slug}&amp;status={slug}&amp;page={number}</em></code>
+      </div>
+      <p class="desc-text">Filter anime berdasarkan genre, season, studio, status, tipe, dan urutan.</p>
+      <div class="section-label">Parameters</div>
+      <table class="params-table">
+        <thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td class="param-name">genre[]</td><td class="param-type">array</td><td>Filter by genre (action, isekai, ...)</td></tr>
+          <tr><td class="param-name">season[]</td><td class="param-type">array</td><td>Filter by season (fall-2024, winter-2025)</td></tr>
+          <tr><td class="param-name">studio[]</td><td class="param-type">array</td><td>Filter by studio (mappa, 8bit, ...)</td></tr>
+          <tr><td class="param-name">status</td><td class="param-type">string</td><td>ongoing · completed · upcoming · hiatus</td></tr>
+          <tr><td class="param-name">type</td><td class="param-type">string</td><td>tv · ova · movie · special · ona · music</td></tr>
+          <tr><td class="param-name">order</td><td class="param-type">string</td><td>title · update · latest · popular · rating</td></tr>
+          <tr><td class="param-name">page</td><td class="param-type">integer</td><td>Halaman (default: 1)</td></tr>
+        </tbody>
+      </table>
+      <a class="exec-btn" href="https://hex-anime.vercel.app/anime?genre[]=action&status=ongoing&page=1" target="_blank">Try It Out</a>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- DETAIL -->
+    <div class="endpoint" id="detail">
+      <div class="endpoint-header">
+        <span class="endpoint-icon">◈</span>
+        <h2 class="endpoint-title">Detail Anime</h2>
+        <span class="method-badge">GET</span>
+      </div>
+      <div class="endpoint-url">
+        <code>https://hex-anime.vercel.app/anime/<em>{slug}</em></code>
+      </div>
+      <p class="desc-text">Detail lengkap anime: sinopsis, cast, genre, daftar episode, dan rekomendasi.</p>
+      <div class="section-label">Parameters</div>
+      <table class="params-table">
+        <thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td class="param-name">slug</td><td class="param-type">string</td><td>Slug anime, contoh: seihantai-na-kimi-to-boku<code style="color:var(--gray-400)"></code></td></tr>
+        </tbody>
+      </table>
+      <a class="exec-btn" href="https://hex-anime.vercel.app/anime/kaoru-hana-wa-rin-to-saku" target="_blank">Try It Out</a>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- WATCH -->
+    <div class="endpoint" id="watch">
+      <div class="endpoint-header">
+        <span class="endpoint-icon">◈</span>
+        <h2 class="endpoint-title">Nonton Episode</h2>
+        <span class="method-badge">GET</span>
+      </div>
+      <div class="endpoint-url">
+        <code>https://hex-anime.vercel.app/ntn/<em>{slug}</em></code>
+      </div>
+      <p class="desc-text">Detail episode + iframe streaming + daftar episode + rekomendasi.</p>
+      <div class="section-label">Parameters</div>
+      <table class="params-table">
+        <thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td class="param-name">slug</td><td class="param-type">string</td><td>Slug episode, contoh: <code style="color:var(--gray-400)">kaoru-hana-wa-rin-to-saku-episode-1-subtitle-indonesia</code></td></tr>
+        </tbody>
+      </table>
+      <a class="exec-btn" href="https://hex-anime.vercel.app/ntn/kaoru-hana-wa-rin-to-saku-episode-1-subtitle-indonesia" target="_blank">Try It Out</a>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- SEARCH -->
+    <div class="endpoint" id="search">
+      <div class="endpoint-header">
+        <span class="endpoint-icon">◈</span>
+        <h2 class="endpoint-title">Search Anime</h2>
+        <span class="method-badge">GET</span>
+      </div>
+      <div class="endpoint-url">
+        <code>https://hex-anime.vercel.app/search/<em>{number}</em>/<em>{query}</em></code>
+      </div>
+      <p class="desc-text">Cari anime berdasarkan keyword dengan pagination.</p>
+      <div class="section-label">Parameters</div>
+      <table class="params-table">
+        <thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td class="param-name">page</td><td class="param-type">integer</td><td>Nomor halaman</td></tr>
+          <tr><td class="param-name">query</td><td class="param-type">string</td><td>Kata kunci, contoh: Hana wa Rin to Saku</td></tr>
+        </tbody>
+      </table>
+      <a class="exec-btn" href="https://hex-anime.vercel.app/search/1/Hana%20wa%20Rin%20to%20Saku" target="_blank">Try It Out</a>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- GENRE -->
+    <div class="endpoint" id="genre">
+      <div class="endpoint-header">
+        <span class="endpoint-icon">◈</span>
+        <h2 class="endpoint-title">Anime by Genre</h2>
+        <span class="method-badge">GET</span>
+      </div>
+      <div class="endpoint-url">
+        <code>https://hex-anime.vercel.app/genres/<em>{slug}</em>/page/<em>{number}</em></code>
+      </div>
+      <p class="desc-text">Daftar anime berdasarkan genre tertentu dengan pagination.</p>
+      <div class="section-label">Parameters</div>
+      <table class="params-table">
+        <thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td class="param-name">slug</td><td class="param-type">string</td><td>action · romance · isekai · ...</td></tr>
+          <tr><td class="param-name">page</td><td class="param-type">integer</td><td>Nomor halaman</td></tr>
+        </tbody>
+      </table>
+        <a class="exec-btn" href="https://animkuapi.vercel.app/anime/digimon-beatbreak" target="_blank">Try It Out</a>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- DIRECTOR -->
+    <div class="endpoint" id="director">
+      <div class="endpoint-header">
+        <span class="endpoint-icon">◈</span>
+        <h2 class="endpoint-title">Anime by Director</h2>
+        <span class="method-badge">GET</span>
+      </div>
+      <div class="endpoint-url">
+        <code>https://hex-anime.vercel.app/director/<em>{slug}</em>/page/<em>{number}</em></code>
+      </div>
+      <p class="desc-text">Daftar anime berdasarkan director tertentu.</p>
+      <div class="section-label">Parameters</div>
+      <table class="params-table">
+        <thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td class="param-name">slug</td><td class="param-type">string</td><td>contoh: nagatomo-takakazu</td></tr>
+          <tr><td class="param-name">page</td><td class="param-type">integer</td><td>Nomor halaman</td></tr>
+        </tbody>
+      </table>
+      <a class="exec-btn" href="https://hex-anime.vercel.app/director/nagatomo-takakazu/page/1" target="_blank">Try It Out</a>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- PRODUCER -->
+    <div class="endpoint" id="producer">
+      <div class="endpoint-header">
+        <span class="endpoint-icon">◈</span>
+        <h2 class="endpoint-title">Anime by Producer</h2>
+        <span class="method-badge">GET</span>
+      </div>
+      <div class="endpoint-url">
+        <code>https://hex-anime.vercel.app/producer/<em>{slug}</em>/page/<em>{number}</em></code>
+      </div>
+      <p class="desc-text">Daftar anime berdasarkan producer tertentu.</p>
+      <div class="section-label">Parameters</div>
+      <table class="params-table">
+        <thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td class="param-name">slug</td><td class="param-type">string</td><td>contoh: aniplex</td></tr>
+          <tr><td class="param-name">page</td><td class="param-type">integer</td><td>Nomor halaman</td></tr>
+        </tbody>
+      </table>
+      <a class="exec-btn" href="https://hex-anime.vercel.app/producer/aniplex/page/1" target="_blank">Try It Out</a>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- STUDIO -->
+    <div class="endpoint" id="studio">
+      <div class="endpoint-header">
+        <span class="endpoint-icon">◈</span>
+        <h2 class="endpoint-title">Anime by Studio</h2>
+        <span class="method-badge">GET</span>
+      </div>
+      <div class="endpoint-url">
+        <code>https://hex-anime.vercel.app/studio/<em>{slug}</em>/page/<em>{number}</em></code>
+      </div>
+      <p class="desc-text">Daftar anime berdasarkan studio animasi tertentu.</p>
+      <div class="section-label">Parameters</div>
+      <table class="params-table">
+        <thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td class="param-name">slug</td><td class="param-type">string</td><td>contoh: mappa</td></tr>
+          <tr><td class="param-name">page</td><td class="param-type">integer</td><td>Nomor halaman</td></tr>
+        </tbody>
+      </table>
+      <a class="exec-btn" href="https://hex-anime.vercel.app/studio/mappa/page/1" target="_blank">Try It Out</a>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- SEASON -->
+    <div class="endpoint" id="season">
+      <div class="endpoint-header">
+        <span class="endpoint-icon">◈</span>
+        <h2 class="endpoint-title">Anime by Season</h2>
+        <span class="method-badge">GET</span>
+      </div>
+      <div class="endpoint-url">
+        <code>https://hex-anime.vercel.app/season/<em>{slug}</em></code>
+      </div>
+      <p class="desc-text">Daftar anime berdasarkan musim tayang (Summer 2025, Fall 2025, dll).</p>
+      <div class="section-label">Parameters</div>
+      <table class="params-table">
+        <thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td class="param-name">slug</td><td class="param-type">string</td><td>summer-2025 · fall-2025 · winter-2026</td></tr>
+        </tbody>
+      </table>
+      <a class="exec-btn" href="https://hex-anime.vercel.app/season/winter-2026" target="_blank">Try It Out</a>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- CAST -->
+    <div class="endpoint" id="cast">
+      <div class="endpoint-header">
+        <span class="endpoint-icon">◈</span>
+        <h2 class="endpoint-title">Anime by Cast</h2>
+        <span class="method-badge">GET</span>
+      </div>
+      <div class="endpoint-url">
+        <code>https://hex-anime.vercel.app/cast/<em>{slug}</em>/page/<em>{number}</em></code>
+      </div>
+      <p class="desc-text">Daftar anime berdasarkan voice actor/cast tertentu.</p>
+      <div class="section-label">Parameters</div>
+      <table class="params-table">
+        <thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td class="param-name">slug</td><td class="param-type">string</td><td>contoh: kusunoki-tomori</td></tr>
+          <tr><td class="param-name">page 
+          </td><td class="param-type">integer</td><td>Nomor halaman</td></tr>
+        </tbody>
+      </table>
+      <a class="exec-btn" href="https://hex-anime.vercel.app/cast/kusunoki-tomori/page/1" target="_blank">Try It Out</a>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<footer class="footer">
+  <span> HexAnime API · Scraper-based · No Auth Required</span>
+  <span>Source: samehadaku.li</span>
+</footer>
+
+<script>
+  function copyCode(btn) {
+    const pre = btn.closest('.code-block').querySelector('pre');
+    const text = pre.innerText;
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = 'copied!';
+      setTimeout(() => btn.textContent = 'copy', 1500);
+    });
+  }
+</script>
+</body>
+</html>
